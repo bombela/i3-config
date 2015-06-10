@@ -45,11 +45,10 @@ def parse_wmove(w):
         return (WDest.num, n)
     except ValueError:
         pass
-    if w == 'down':
-        return (WDest.down, None)
-    elif w == 'up':
-        return (WDest.up, None)
-    raise Exception('Invalid workspace move {0}'.format(w))
+    try:
+        return (getattr(WDest, w), None)
+    except Exception:
+        raise Exception('Invalid workspace move {0}'.format(w))
 
 def get_wgroup(ws):
     focused = filter(lambda x: x.get('focused'), ws)
@@ -76,7 +75,7 @@ def wclosest(ws, group_, wnum_):
         print 'wclosest', group_, wnum_, '->', wid
         return group, wid
     wnum = LRU_WNUM_PER_GROUPS.get(group, wnum_)
-    ws = sorted(ws, key=lambda x: abs((x.get('num') % 10) - wnum))
+    ws.sort(key=lambda x: abs((x.get('num') % 10) - wnum))
     wid = ws[0].get('num')
     print 'wclosest', group_, wnum_, '->', wid
     return group, wid
@@ -110,10 +109,23 @@ def cmd_move(wmove):
 
 def cmd_move_and_focus(wmove):
     wid = dest_wid(wmove)
-    print 'move', wmove, '->', wid
+    print 'move & focus', wmove, '->', wid
     wid = str(wid)
     i3.move('workspace', wid)
     i3.workspace(wid)
+
+def cmd_move_group_output(output):
+    ws = i3.get_workspaces()
+    group, current_wnum = get_wgroup(ws)
+    ws = [w for w in ws if w.get('num') / 10 == group]
+    ws.sort(key=lambda x: abs((x.get('num') % 10) - current_wnum), reverse=True)
+    wids = [w.get('num') for w in ws]
+    assert len(wids) > 0
+    print 'move_group_output', output, '->', wids
+    i3_move_args = ['workspace', 'to', output]
+    for wid in wids:
+        i3.workspace(str(wid))
+        i3.move(*i3_move_args)
 
 if len(sys.argv) < 2:
     print 'daemon mode'

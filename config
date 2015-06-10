@@ -143,6 +143,18 @@ bindsym $mod+Shift+Prior exec $wgroups move_and_focus up
 bindsym $mod+Next exec $wgroups focus down
 bindsym $mod+Shift+Next exec $wgroups move_and_focus down
 
+bindsym $mod+x move workspace to output right
+bindsym $mod+Ctrl+Right move workspace to output right
+bindsym $mod+Ctrl+Left move workspace to output left
+bindsym $mod+Ctrl+Up move workspace to output up
+bindsym $mod+Ctrl+Down move workspace to output down
+
+bindsym $mod+Shift+x exec $wgroups move_group_output right
+bindsym $mod+Ctrl+Shift+Right exec $wgroups move_group_output right
+bindsym $mod+Ctrl+Shift+Left exec $wgroups move_group_output left
+bindsym $mod+Ctrl+Shift+Up exec $wgroups move_group_output up
+bindsym $mod+Ctrl+Shift+Down exec $wgroups move_group_output down
+
 # reload the configuration file
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
@@ -213,12 +225,6 @@ mouse_warping output
 #workspace_auto_back_and_forth yes
 
 #force_xinerama yes
-
-bindsym $mod+x move workspace to output right
-bindsym $mod+Ctrl+Right move workspace to output right
-bindsym $mod+Ctrl+Left move workspace to output left
-bindsym $mod+Ctrl+Up move workspace to output up
-bindsym $mod+Ctrl+Down move workspace to output down
 
 bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
