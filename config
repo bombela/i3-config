@@ -139,9 +139,11 @@ bindsym $mod+Shift+KP_0 exec $wgroups move_and_focus 10
 
 bindsym $mod+Prior exec $wgroups focus up
 bindsym $mod+Shift+Prior exec $wgroups move_and_focus up
+bindsym $mod+Ctrl+Prior exec $wgroups move_group up
 
 bindsym $mod+Next exec $wgroups focus down
 bindsym $mod+Shift+Next exec $wgroups move_and_focus down
+bindsym $mod+Ctrl+Next exec $wgroups move_group down
 
 bindsym $mod+x move workspace to output right
 bindsym $mod+Ctrl+Right move workspace to output right
