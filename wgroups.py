@@ -114,18 +114,64 @@ def cmd_move_and_focus(wmove):
     i3.move('workspace', wid)
     i3.workspace(wid)
 
+def wids_by_furthest(ws, group, wnum):
+    ws = [w for w in ws if w.get('num') / 10 == group]
+    ws.sort(key=lambda x: abs((x.get('num') % 10) - wnum), reverse=True)
+    wids = [w.get('num') for w in ws]
+    assert len(wids) > 0
+    return wids
+
 def cmd_move_group_output(output):
     ws = i3.get_workspaces()
     group, current_wnum = get_wgroup(ws)
-    ws = [w for w in ws if w.get('num') / 10 == group]
-    ws.sort(key=lambda x: abs((x.get('num') % 10) - current_wnum), reverse=True)
-    wids = [w.get('num') for w in ws]
-    assert len(wids) > 0
+    wids = wids_by_furthest(ws, group, current_wnum)
     print 'move_group_output', output, '->', wids
     i3_move_args = ['workspace', 'to', output]
     for wid in wids:
         i3.workspace(str(wid))
         i3.move(*i3_move_args)
+
+def find_closest_empty_group(ws, starting_group, up):
+    groups = set(w.get('num') / 10 for w in ws)
+    groups = sorted((g for g in groups
+            if (g > starting_group if up else g < starting_group)),
+            reverse=not up)
+    prev_group = starting_group
+    empty_group = None
+    for g in groups:
+        maybe_empty_group = g + (-1 if up else 1)
+        if maybe_empty_group != prev_group:
+            empty_group = maybe_empty_group
+            break
+        prev_group = g
+    if empty_group is None:
+        print 'prev_group', prev_group
+        empty_group = prev_group + (1 if up else -1)
+    print 'closest_empty_group', starting_group, groups, '->', empty_group
+    return empty_group
+
+def cmd_move_group(direction):
+    ws = i3.get_workspaces()
+    group, current_wnum = get_wgroup(ws)
+    if direction == 'up':
+        empty_group = find_closest_empty_group(ws, group, True)
+        pass
+    elif direction == 'down':
+        empty_group = find_closest_empty_group(ws, group, False)
+        pass
+    else:
+        raise Exception('Invalid direction: {0}'.format(direction))
+    if empty_group < 0:
+        return
+    current_wids = wids_by_furthest(ws, group, current_wnum)
+    wids = [wroundid(empty_group, wid % 10) for wid in current_wids]
+    print 'move_group', direction, current_wids, '->', wids
+    collisions = set(wids).intersection(set(w.get('num') for w in ws))
+    if collisions:
+        raise Exception('Can\'t move, there would be collisions: {0}'.format(
+            sorted(collisions)))
+    for cur_wid, new_wid in zip(current_wids, wids):
+        i3.rename('workspace', str(cur_wid), 'to', str(new_wid))
 
 if len(sys.argv) < 2:
     print 'daemon mode'
